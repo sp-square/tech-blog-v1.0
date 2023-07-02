@@ -1,18 +1,17 @@
 const router = require('express').Router();
 const { Comment, User, Post } = require('../../models');
+const withAuth = require('../../utils/auth');
 
 /***** CREATE *****/
 // Route to create a new comment
 // POST method with endpoint '/api/comments/'
-// test with: {"text": "This is the text for a new comment", "userId": 12, "postId": 22}
-// TODO: only authenticated users can comment
-router.post('/', async (req, res) => {
+// test with: {"text": "This is the text for a new comment", "postId": 18}
+router.post('/', withAuth, async (req, res) => {
 	try {
 		const newComment = await Comment.create({
 			text: req.body.text,
 			postId: req.body.postId,
-			// TODO: the userId will come from req.session once we have set up our sessions
-			userId: req.body.userId,
+			userId: req.session.userId,
 		});
 		res.status(201).json(newComment);
 	} catch (error) {
@@ -60,14 +59,14 @@ router.get('/:commentId', async (req, res) => {
 // Route to update a comment by id
 // PUT method with endpoint '/api/comments/:commentId'
 // test with: {"text": "This is the updated text for an existing comment"}
-// TODO: only authenticated users can update their comments
-router.put('/:commentId', async (req, res) => {
+// only authenticated users can update their comments
+router.put('/:commentId', withAuth, async (req, res) => {
 	try {
 		const updatedComment = await Comment.update(req.body, {
 			where: {
 				id: req.params.commentId,
-				// TODO: verify that comment belongs to user attempting o update it (userId will come from req.session once we have set up our sessions)
-				// userId: req.session.userId
+				// comment must belong to user attempting to update it (userId will come from req.session)
+				userId: req.session.userId,
 			},
 		});
 
@@ -86,14 +85,14 @@ router.put('/:commentId', async (req, res) => {
 /***** DELETE *****/
 // Route to delete a comment by id
 // DELETE method with endpoint '/api/comments/:commentId'
-// TODO: only admin or authenticated users can delete their comments
-router.delete('/:commentId', async (req, res) => {
+// TODO: ICEBOX => Admin can also delete comments
+router.delete('/:commentId', withAuth, async (req, res) => {
 	try {
 		const deletedComment = await Comment.destroy({
 			where: {
 				id: req.params.commentId,
-				// TODO: verify that comment belongs to user attempting o delete it (userId will come from req.session once we have set up our sessions)
-				// userId: req.session.userId
+				// verify that comment belongs to user attempting to delete it (userId will come from req.session)
+				userId: req.session.userId,
 			},
 		});
 

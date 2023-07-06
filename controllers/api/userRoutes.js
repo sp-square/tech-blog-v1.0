@@ -12,14 +12,16 @@ const withAuth = require('../../utils/auth');
 // POST method with endpoint '/api/users/'
 // test with: {"username": "testUser", "email": "testUser@email.com", "password": "Password123"}
 router.post('/', async (req, res) => {
+	console.log(req.body);
 	try {
+		// TODO: check if user already exists in DB and redirect to login instead
 		// create new user
 		const newUser = await User.create({
 			username: req.body.username,
 			email: req.body.email,
 			password: req.body.password,
 		});
-
+		console.log('newUser', newUser);
 		// save new session to db
 		req.session.save(() => {
 			// create session variables based on the newly signed up user
